@@ -16,12 +16,17 @@ module.exports = {
                 use: ["style-loader", "css-loader"],
             },
             {
-                test: /\.png$/,
-                loader: "file-loader",
-                options: {
-                    publicPath: "./dist/",
-                    name: "[name].[ext]?[hash]",
-                },
+                test: /\.(png|jpg|gif)$/i,
+                use: [
+                    {
+                        loader: "url-loader",
+                        options: {
+                            publicPath: "./dist/",
+                            name: "[name].[ext]?[hash]",
+                            limit: 5000, // 5kb 미만 파일만 data url로 처리
+                        },
+                    },
+                ],
             },
         ],
     },

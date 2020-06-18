@@ -90,6 +90,37 @@ module.exports = {
 > webpack.config.js
 
 ```js
+// webpack.config.js
+module.exports = {
+  (생략)
+  module: {
+    rules: [
+      {
+        test: '파일명 또는 가지고올 파일 패턴 정규식',
+        use: ['사용할 로더의 이름']
+      }
+    ]
+  }
+}
+```
+
+- test에는 로더를 적용할 파일을 지정한다.
+- use에는 test에서 지정한 파일들에 적용할 로더를 설정한다.
+
+특정 파일에 대해 여러 개의 로더를 사용하는 경우, 배열에 여러개의 로더를 넣을 수도 있는데 이 때 로더가 **오른쪽에서 왼쪽 순으로 사용**됨을 주의해야 한다.
+```js
+module: {
+  rules: [
+    {
+      test: /\.scss$/,
+      use: ['css-loader', 'sass-loader'] // sass 전처리기 사용 후 css 로더 사용
+    }
+  ]
+}
+```
+로더는 아래와 같이 옵션을 포함한 형태로도 입력할 수 있다
+```js
+
 module : {
 	rules: {
 		test: '파일명 또는 가지고올 파일 패턴 정규식',
@@ -102,9 +133,6 @@ module : {
 	}
 }
 ```
-
-- test에는 로더를 적용할 파일을 지정한다.
-- use에는 test에서 지정한 파일들에 적용할 로더를 설정한다.
 
 #### 2.3.1. 커스텀 로더 만들기
 
@@ -254,8 +282,6 @@ style-loader까지 적용한 뒤 아래처럼 간단한 css 파일을 App.js에 
 
 import 한 CSS 파일이 성공적으로 모듈로 잘 인식되어 적용된 것을 확인할 수 있다. 
 
-#### 
-
 ##### (2) file-loader
 
 file-loader 을 통해 png, svg 등의 이미지를 번들링 (웹팩 아웃풋으로 옮길) 할 수 있다. 예를 들어, CSS에서 url() 함수에 이미지 파일 경로를 지정하면, 웹팩은 해당 이미지 파일을 만났을 때 file-loader을 실행시켜 아웃풋에 설정한 경로로 이미지 파일을 복사할 것이다.
@@ -310,6 +336,46 @@ module.exports = {
 
 이렇게 설정해주고 나면, css에서 불러온 파일이 정상적으로 동작하는 것을 확인할 수 있다.
 
+##### (3) url-loader
+
+사용하는 이미지 갯수가 많다면, 네트워크 리소스에 부담을 줘 성능에 영향을 줄 수 있다. 한 페이지에서 작은 이미지(아이콘 등)를 여러개 사용한다면, 이미지를 Base64로 인코딩하여 문자열 형태로 소스코드에 넣는 형식이 더 나을 수도 있다. [참고 링크 : Data URIs](https://developer.mozilla.org/ko/docs/Web/HTTP/Basics_of_HTTP/Data_URIs)
+
+url-loader은 이런 처리를 자동화해준다. 이전 loader들과 마찬가지로, 설치와 웹팩 설정을 해보자.
+
+```shell
+$ npm install -D url-loader
+```
+
+> webpack.config.js
+
+```js
+{
+  test: /\.(png|jpg|gif)$/i,
+    use: [
+      {
+        loader: 'url-loader',
+        options: {
+          publicPath: './dist/', 
+          name: '[name].[ext]?[hash]', 
+          limit: 5000 // 5kb 미만 파일만 data url로 처리 
+        },
+      },
+    ],
+},
+```
+
+⚠️ 앞서 설정했던 file-loader 대신 url-loader 로 **변경**해주는 것임.
+
+url-loader의 설정은 file-loader과 거의 유사하다. 마지막 limit 속성만 다른데, 이는 모듈로 사용한 파일 중 크기가 5kb 미만인 파일만 url-loader을 적용한다. 5kb 이상인 파일은 fallback 기본값으로 file-loader이 처리한다.
+
+<img src="README.assets/image-20200618212342119.png" alt="image-20200618212342119" style="zoom: 33%;" />
+
+빌드 결과를 보면, limit 사이즈를 초과하는 wallpaper.png는 파일로 존재하고,
+
+<img src="README.assets/image-20200618212502489.png" alt="image-20200618212502489" style="zoom: 50%;" />
+
+limit 사이즈보다 작은 favicon은 dist 파일에 존재하지 않고 data url 형태로 변환된 것을 볼 수 있다.
+
 ---
 
 ### References
@@ -320,5 +386,5 @@ module.exports = {
 
 [프론트엔드 개발환경의 이해](http://jeonghwan-kim.github.io/series/2020/01/02/frontend-dev-env-webpack-intermediate.html)
 
-
+[웹팩 핸드북](https://joshua1988.github.io/webpack-guide/)
 
