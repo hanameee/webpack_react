@@ -32,5 +32,15 @@ module.exports = {
             },
         ],
     },
-    plugins: [new webpack.BannerPlugin(banner)],
+    plugins: [
+        new webpack.BannerPlugin(banner),
+        new webpack.DefinePlugin({
+            VERSION: JSON.stringify("v.1.2.3"),
+            PRODUCTION: JSON.stringify(false),
+            MAX_COUNT: JSON.stringify(999),
+            "api.domain": JSON.stringify("https://hanameee.github.io/"),
+            TWO: "1+1",
+            NAME: JSON.stringify("HANNAH"),
+        }),
+    ],
 };

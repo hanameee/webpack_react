@@ -514,7 +514,47 @@ module.exports = {
 
 <img src="README.assets/image-20200618223503934.png" alt="image-20200618223503934" style="zoom:33%;" />
 
+##### (2) DefinePlugin
 
+어플리케이션의 환경 (개발환경/운영환경)에 의존적인 정보가 있을 수 있다. 배포할 때마다 코드를 수정하는 것은 비효율적이므로, 이러한 환경 의존적인 정보들은 소스가 아닌 곳에서 관리하는 것이 좋다.
+
+웹팩에서는 이러한 환경 정보를 DefinePlugin을 통해 관리할 수 있다.
+
+> webpack.config.js
+```js
+const webpack = require("webpack");
+
+module.exports = {
+  	(생략)
+    plugins: [new webpack.DefinePlugin({})],
+};
+
+```
+플러그인 생성자 함수에 빈 객체를 전달해도, 기본적으로 노드의 환경 정보인 `process.env.NODE_ENV` 값이 웹팩 설정의 mode에 설정한 값과 동일하게 들어간다. 어플리케이션 코드에서 `process.env.NODE_ENV` 변수로 접근하면 "development" 값을 얻을 수 있다.
+
+이 외에도, 웹팩 컴파일 시간에 결정되는 값 (코드) 을 전역 상수 문자열로 어플리케이션에 주입할 수 있다. 코드가 아닌 값은 JSON.stringify 로 문자열화 한 뒤 넘겨야 한다.
+
+> webpack.config.js
+```js
+new webpack.DefinePlugin({
+  VERSION: JSON.stringify('v.1.2.3'),
+  PRODUCTION: JSON.stringify(false),
+  MAX_COUNT: JSON.stringify(999),
+  'api.domain': JSON.stringify('https://hanameee.github.io/'),
+  TWO: '1+1',
+  NAME: JSON.stringify("HANNAH"),
+})
+```
+> app.js
+```js
+console.log(VERSION) // 'v.1.2.3'
+console.log(PRODUCTION) // true
+console.log(MAX_COUNT) // 999
+console.log(api.domain) // 'https://hanameee.github.io/'
+console.log(TWO) // 2
+console.log(NAME) // HANNAH
+```
+이렇게 빌드 타임에 결정된 값을 어플리케이션에 전달할 때는 DefinePlugin 을 사용하면 된다.
 
 ---
 
