@@ -1,0 +1,19 @@
+{
+  "name": "webpack_react",
+  "version": "1.0.0",
+  "description": "Create React App from scratch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanameee/webpack_react.git"
+  },
+  "author": "@hanameee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hanameee/webpack_react/issues"
+  },
+  "homepage": "https://github.com/hanameee/webpack_react#readme"
+}
