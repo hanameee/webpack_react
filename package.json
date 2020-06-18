@@ -19,6 +19,7 @@
     "homepage": "https://github.com/hanameee/webpack_react#readme",
     "devDependencies": {
         "css-loader": "^3.6.0",
+        "file-loader": "^6.0.0",
         "style-loader": "^1.2.1",
         "webpack": "^4.43.0",
         "webpack-cli": "^3.3.11"

@@ -196,7 +196,7 @@ module.exports = {
 
 #### 2.3.2. 자주 사용하는 로더 설정하기
 
-##### css-loader + style-loader
+##### (1) css-loader + style-loader
 
 CSS를 번들링하기 위해서는 css-loader와 style-loader를 함께 사용해야 한다.
 
@@ -254,13 +254,69 @@ style-loader까지 적용한 뒤 아래처럼 간단한 css 파일을 App.js에 
 
 import 한 CSS 파일이 성공적으로 모듈로 잘 인식되어 적용된 것을 확인할 수 있다. 
 
+#### 
+
+##### (2) file-loader
+
+file-loader 을 통해 png, svg 등의 이미지를 번들링 (웹팩 아웃풋으로 옮길) 할 수 있다. 예를 들어, CSS에서 url() 함수에 이미지 파일 경로를 지정하면, 웹팩은 해당 이미지 파일을 만났을 때 file-loader을 실행시켜 아웃풋에 설정한 경로로 이미지 파일을 복사할 것이다.
+
+적당히 asset 폴더에 png를 하나 넣어주고, css에서 그 이미지 파일을 사용해보자.
+
+![image-20200618195820528](README.assets/image-20200618195820528.png)
+
+이후 file-loader 을 설치 및 설정해준다.
+```shell
+$ npm install -D file-loader
+```
+
+> webpack.config.js
+
+```js
+module.exports = {
+  (생략)
+  module: {
+    rules: [{
+      test: /\.png$/,
+      loader: 'file-loader',
+    }]
+  }
+}
+```
+
+그런데, 이대로 빌드를 하면 이미지를 제대로 로딩하지 못한다. 그 이유는, png를 사용하는 측에서 `../assets/wallpaper.png` 로 파일을 요청하는데 웹팩으로 빌드한 이미지 파일은 output인 dist 폴더로 이동했기 때문이다.
+
+따라서 옵션을 조정해 **경로를 바로잡아줘야 한다**.
+
+> webpack.config.js
+
+```js
+module.exports = {
+  (생략)
+  module: {
+    rules: [{
+      test: /\.png$/,
+      loader: 'file-loader',
+      options: {
+        publicPath: './dist/', // prefix를 아웃풋 경로로 지정 
+        name: '[name].[ext]?[hash]', // 파일명 형식 
+      }
+    }]
+  }
+}
+```
+**publicPath** 옵션을 통해 file-loader이 처리하는 파일을 모듈로 사용할 때 **경로 앞에 추가될 문자열을 설정**할 수 있다. publicPath를  `./dist` 로 설정해 새롭게 옮겨진 파일 경로로 수정해주자.
+
+또한, **name** 옵션을 통해 로더가 파일을 output에 복사할 때 사용할 파일 이름을 설정할 수 있다. 기본적으로 설정된 해쉬값을 쿼리스트링으로 옮겨 파일을 요청하도록 변경하자.
+
+이렇게 설정해주고 나면, css에서 불러온 파일이 정상적으로 동작하는 것을 확인할 수 있다.
+
 ---
 
 ### References
 
 [Webpack과 Babel을 이용한 React 개발 환경 구성하기](https://medium.com/wasd/웹팩-webpack-과-바벨-babel-을-이용한-react-개발-환경-구성하기-fb87d0027766)
 
-[React 개발 환경을 구축하면서 배우는 웹팩(Webpack) 기초]([https://velog.io/@jeff0720/React-%EA%B0%9C%EB%B0%9C-%ED%99%98%EA%B2%BD%EC%9D%84-%EA%B5%AC%EC%B6%95%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%B0%EC%9A%B0%EB%8A%94-Webpack-%EA%B8%B0%EC%B4%88](https://velog.io/@jeff0720/React-개발-환경을-구축하면서-배우는-Webpack-기초))
+[React 개발 환경을 구축하면서 배우는 웹팩(Webpack) 기초](https://velog.io/@jeff0720/React-개발-환경을-구축하면서-배우는-Webpack-기초))
 
 [프론트엔드 개발환경의 이해](http://jeonghwan-kim.github.io/series/2020/01/02/frontend-dev-env-webpack-intermediate.html)
 
