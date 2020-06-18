@@ -453,6 +453,69 @@ module.exports = {
 
 빌드한 후 결과물을 확인해보면 위와 같이 번들 결과물에 배너가 추가된 것을 볼 수 있다.
 
+#### 2-4-3. 자주 사용하는 플러그인 설정하기
+
+##### (1) BannerPlugin
+
+위에서 설정해본 커스텀 플러그인과 유사한 것이 BannerPlugin 이다. 빌드 결과에 여러 정보를 추가할 수 있다.
+
+플러그인 생성자 함수에 전달하는 객체의 banner 속성 값으로 문자열을 전달하거나, 웹팩 컴파일 타임에 얻을 수 있는 정보 (ex. 빌드 시간) 를 전달하기 위해 함수로 전달할 수도 있다.
+
+> webpack.config.js
+
+```js
+const webpack = require('webpack');
+
+module.exports = {
+  plugins: [
+    new webpack.BannerPlugin({
+      // banner: '배너입니다',
+      banner: () => `빌드 날짜: ${new Date().toLocaleString()}`
+    })
+  ]
+```
+
+배너 정보가 많을 시, 별도 파일로 분리하는 것이 좋다.
+
+> banner.js
+```js
+const childProcess = require('child_process');
+
+module.exports = function banner() {
+  const commit = childProcess.execSync('git rev-parse --short HEAD')
+  const user = childProcess.execSync('git config user.name')
+  const date = new Date().toLocaleString();
+  
+  return (
+    `commitVersion: ${commit}` +
+    `Build Date: ${date}\n` +
+    `Author: ${user}`
+  );
+}
+```
+
+banner정보를 별도의 파일로 분리하여 빌드 날짜와 커밋 해쉬, 빌드한 유저 정보까지 추가했다. childProcess 모듈에 대한 내용은 [링크](https://mylko72.gitbooks.io/node-js/content/chapter9/chapter9_2.html) 를 참고하자.
+
+> webpack.config.js
+
+```js
+const path = require("path");
+const webpack = require("webpack");
+const banner = require("./banner.js");
+
+module.exports = {
+  	(생략)
+    plugins: [new webpack.BannerPlugin(banner)],
+};
+
+```
+
+빌드한 뒤 결과물은 아래와 같다.
+
+<img src="README.assets/image-20200618223503934.png" alt="image-20200618223503934" style="zoom:33%;" />
+
+
+
 ---
 
 ### References

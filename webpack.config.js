@@ -1,5 +1,6 @@
 const path = require("path");
-const MyPlugin = require("./src/myplugin");
+const webpack = require("webpack");
+const banner = require("./banner.js");
 
 module.exports = {
     mode: "development",
@@ -31,5 +32,5 @@ module.exports = {
             },
         ],
     },
-    plugins: [new MyPlugin()],
+    plugins: [new webpack.BannerPlugin(banner)],
 };
