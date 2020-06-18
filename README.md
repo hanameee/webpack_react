@@ -83,6 +83,8 @@ module.exports = {
 
 ### 2-3. Loader
 
+#### 2-3-1. 로더 기본 개념과 사용법
+
 웹팩은 기본적으로 자바스크립트와 JSON 만 빌드할 수 있다. 로더는 웹팩이 자바스크립트 파일이 아닌 파일들을도 (CSS, 이미지, 폰트 등...) 이해하고 모듈로 관리할 수 있게 해준다.
 
 로더를 사용하기 위해선, 필요에 맞는 로더를 설치한 후  `module` 과 `rules` 키워드를 사용해 웹팩 설정 파일에 정의하면 된다. 기본적인 틀은 아래와 같다.
@@ -90,7 +92,6 @@ module.exports = {
 > webpack.config.js
 
 ```js
-// webpack.config.js
 module.exports = {
   (생략)
   module: {
@@ -134,7 +135,7 @@ module : {
 }
 ```
 
-#### 2.3.1. 커스텀 로더 만들기
+#### 2-3-2. 커스텀 로더 만들기
 
 동작 원리를 이해하기 위해 커스텀 로더를 만들어보자.
 
@@ -220,9 +221,7 @@ module.exports = {
 
 만들었던 커스텀 로더로 인해 console.log가 아니라 alert 로 변경된 것을 확인할 수 있다.
 
-
-
-#### 2.3.2. 자주 사용하는 로더 설정하기
+#### 2-3-3. 자주 사용하는 로더 설정하기
 
 ##### (1) css-loader + style-loader
 
@@ -375,6 +374,84 @@ url-loader의 설정은 file-loader과 거의 유사하다. 마지막 limit 속�
 <img src="README.assets/image-20200618212502489.png" alt="image-20200618212502489" style="zoom: 50%;" />
 
 limit 사이즈보다 작은 favicon은 dist 파일에 존재하지 않고 data url 형태로 변환된 것을 볼 수 있다.
+
+
+
+### 2-4. Plugin
+
+#### 2-4-1. 플러그인 기본 개념과 사용법
+
+앞서 알아본 로더가 파일을 해석하고 변환하는 과정에 관여했다면 (파일 단위), 플러그인은 웹팩을 통해 **번들된 결과물**의 형태를 바꾸는 과정에 관여한다. 예를 들면, 번들된 JS를 난독화하거나 특정 텍스트를 추출하는 용도로 사용한다.
+
+플러그인은 아래와 같이 `plugins` 키워드를 통해 선언하며, 플러그인의 배열에는 **생성자 함수로 생성한 객체 인스턴스만 추가**할 수 있다.
+
+> webpack.config.js
+
+```js
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  plugins: [
+    new HtmlWebpackPlugin(),
+    new webpack.ProgressPlugin()
+  ]
+}
+```
+
+#### 2-4-2. 커스텀 플러그인 만들기
+
+동작 원리를 이해하기 위해 커스텀 플러그인을 만들어보자. [참고 링크 - 웹팩 공식 문서 Writing a Plugin](https://webpack.js.org/contribute/writing-a-plugin/)
+
+함수로 만들었던 로더와 다르게, 플러그인은 **클래스**로 만들고 **apply 메서드**를 구현해야 한다. (함수로 만들고 prototype에 설정해주는 것도 가능한 것 같다.) 
+
+> myplugin.js
+```js
+class MyPlugin {
+    apply(compiler) {
+        compiler.hooks.done.tap("MyPlugin", (stats) => {
+            console.log("MyPlugin 실행");
+        });
+        compiler.hooks.emit.tap("MyPlugin", (compilation) => {
+            // 번들링 된 결과물을 source 변수에 저장한다
+            const source = compilation.assets["main.js"].source();
+            // 번들 소스를 얻어오는 함수를 재정의한다
+            compilation.assets["main.js"].source = () => {
+                const banner = [
+                    "/**",
+                    " * 이것은 MyPlugin이 처리한 결과입니다.",
+                    ` * Build Date: ${Date.now()}`,
+                    " */",
+                    "",
+                ].join("\n");
+                return banner + "\n" + source;
+            };
+            console.log(source);
+        });
+    }
+}
+
+module.exports = MyPlugin;
+
+```
+apply 메서드는 웹팩 컴파일러가 플러그인을 설치할 때 한번 실행된다. apply 메서드는 웹팩 컴파일러에 대한 참조값을  `compiler` 인자로 받아, 콜백 함수의 실행을 보장한다. 자세한 내용은 [웹팩 공식문서 - Compiler hooks](https://webpack.js.org/api/compiler-hooks/) 를 참고하자.
+
+위 예제의 경우 웹팩 컴파일러의 done hook이 tapped 되었을 때 로그를 찍고, 배너를 추가한다.
+
+> webpack.config.js
+```js
+const MyPlugin = require('./myplugin');
+
+module.exports = {
+  (생략)
+  plugins: [
+    new MyPlugin(),
+  ]
+}
+```
+
+![image-20200618221251268](README.assets/image-20200618221251268.png)
+
+빌드한 후 결과물을 확인해보면 위와 같이 번들 결과물에 배너가 추가된 것을 볼 수 있다.
 
 ---
 
