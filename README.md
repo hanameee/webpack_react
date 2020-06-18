@@ -40,7 +40,7 @@ $ npm install -D webpack webpack-cli
 
 Webpack에서 3가지 옵션만 사용하면 코드를 번들링 할 수 있다.
 
-- `--mode` : 웹팩 실행 모드를 지정한다. production은 최적화되어 빌드되는 특징이, development는 빠르게 빌드되는 특징이 있다.
+- `--mode` : 웹팩 실행 모드를 지정한다. production은 최적화되어 빌드되는 특징이, development는 (최적화 없이) 빠르게 빌드되는 특징이 있다.
 - `--entry` : 어플리케이션 진입점 경로를 지정한다. entry에 명시한 파일 기준으로 모든 dependency를 찾아 하나의 파일로 합치게 된다
 - `--output` : 웹팩에서 빌드를 완료하면 output에 있는 정보를 통해 빌드 파일을 생성한다
 
@@ -193,6 +193,66 @@ module.exports = {
 만들었던 커스텀 로더로 인해 console.log가 아니라 alert 로 변경된 것을 확인할 수 있다.
 
 
+
+#### 2.3.2. 자주 사용하는 로더 설정하기
+
+##### css-loader + style-loader
+
+CSS를 번들링하기 위해서는 css-loader와 style-loader를 함께 사용해야 한다.
+
+**css-loader**을 사용하면, CSS를 모듈로 변환해 import 구문을 사용해 불러올 수 있게 해준다.
+
+```shell
+$ npm install -D css-loader
+```
+
+먼저 로더를 설치한 뒤,
+
+> webpack.config.js
+```js
+module.exports = {
+  (생략)
+  module: {
+    rules: [{
+      test: /\.css$/, // .css 확장자로 끝나는 모든 파일에
+      use: ['css-loader'], // css-loader를 적용 (로더 이름을 문자열로 전달해도 됨) 
+    }]
+  }
+}
+```
+webpack 설정에 css-loader 을 추가해준다.
+
+이렇게 설정하고 나면, 웹팩은 entry point에서 시작해서 모듈을 검색하다가 css 파일을 찾으면 css-loader로 처리할 것이다.
+
+그런데 CSS는 모듈로 변경한다고 (= 자바스크립트 코드로 변경된다고) 끝나는 것이 아니라, DOM에 추가되어야 한다. 이를 위해서 자바스크립트로 변경된 CSS를 동적으로 DOM에 추가해주는 **style-loader**을 사용해야 한다.
+
+css-loader과 동일하게 style-loader을 설치한 뒤,
+
+```shell
+$ npm install -D style-loader
+```
+
+> webpack.config.js
+
+```js
+module.exports = {
+  (생략)
+  module: {
+    rules: [{
+      test: /\.css$/,
+      use: ['style-loader','css-loader'],
+    }]
+  }
+}
+```
+
+webpack 설정에 style-loader 을 추가해준다. 이 때 배열로 설정하면 **뒤에서부터 앞으로** 로더가 동작하므로, 모든 .css 확장자로 끝나는 모듈을 읽어들여 css-loader을 적용하고, 그 다음 style-loader을 적용한다.
+
+style-loader까지 적용한 뒤 아래처럼 간단한 css 파일을 App.js에 import 해주면
+
+<img src="README.assets/image-20200618185118117.png" alt="image-20200618185118117" style="zoom: 33%;" />
+
+import 한 CSS 파일이 성공적으로 모듈로 잘 인식되어 적용된 것을 확인할 수 있다. 
 
 ---
 
