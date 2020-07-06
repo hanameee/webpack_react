@@ -7,3 +7,4 @@ console.log(MAX_COUNT);
 console.log(api.domain);
 console.log(TWO);
 console.log(NAME);
+console.log(process.env.NODE_ENV);

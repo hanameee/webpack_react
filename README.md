@@ -556,6 +556,76 @@ console.log(NAME) // HANNAH
 ```
 이렇게 빌드 타임에 결정된 값을 어플리케이션에 전달할 때는 DefinePlugin 을 사용하면 된다.
 
+##### (3) HtmlWebpackPlugin
+
+HTML 파일을 후처리하기 위해 HtmlWebpackPlugin을 사용할 수 있다. HtmlWebpackPlugin은 번들된 파일을 `<script>` 태그를 사용해 주입한 HTML 파일을 자동으로 생성해준다. (따라서 HTML에 스트립트 로딩 태그가 없어도 된다)
+
+HtmlWebpackPlugin을 사용하면 빌드 타임의 값을 넣거나, 코드를 압축할 수 있고, 웹팩으로 빌드한 결과물을 자동으로 HTML에 주입해준다.
+
+```shell
+$ npm install -D html-webpack-plugin
+```
+
+> webpack.config.js
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+...
+module.exports {
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html', // 템플릿 경로 지정 
+      templateParameters: { // 템플릿에 주입할 파라미터 변수 지정
+        env: process.env.NODE_ENV === 'development' ? '(개발용)' : '', 
+      },
+    })
+  ]
+}
+```
+
+> src/index.html
+
+```ejs
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- 환경 변수에 따라 다른 문자열을 주입한다 -->
+    <title>타이틀<%= env %></title>
+  </head>
+  <body>
+    <!-- 로딩 스크립트가 필요 없다 -->
+    <!-- <script src="dist/main.js"></script> -->
+  </body>
+</html>
+```
+
+htmlwebpackplugin을 사용하면 production 모드에서 파일을 최적화 할 수도 있다.
+
+> webpack.config.js
+
+```js
+new HtmlWebpackPlugin({
+  minify: process.env.NODE_ENV === 'production' ? { 
+    collapseWhitespace: true, // 빈칸 제거 
+    removeComments: true, // 주석 제거 
+  } : false,
+}
+```
+
+위와 같이 minify 옵션을 주고, `NODE_ENV=production npm run build` 로 빌드하면 압축된 html output을 볼 수 있다.
+
+또한, 정적 파일을 배포했을 때 브라우저 캐쉬로 인해 즉각 반영되지 않는 것을 예방하기 위해, 빌드 시 해쉬값을 정적파일 로딩 주소의 쿼리 문자열로 붙일 수도 있다.
+
+> webpack.config.js
+
+```js
+new HtmlWebpackPlugin({
+  hash: true, // 정적 파일을 불러올때 쿼리문자열에 웹팩 해쉬값을 추가한다
+})
+```
+
+
+
 ---
 
 ### References

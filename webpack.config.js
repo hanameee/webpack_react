@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const banner = require("./banner.js");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -23,7 +24,7 @@ module.exports = {
                     {
                         loader: "url-loader",
                         options: {
-                            publicPath: "./dist/",
+                            publicPath: "./",
                             name: "[name].[ext]?[hash]",
                             limit: 5000, // 5kb 미만 파일만 data url로 처리
                         },
@@ -41,6 +42,20 @@ module.exports = {
             "api.domain": JSON.stringify("https://hanameee.github.io/"),
             TWO: "1+1",
             NAME: JSON.stringify("HANNAH"),
+        }),
+        new HtmlWebpackPlugin({
+            template: "./src/index.html",
+            templateParameters: {
+                env: process.env.NODE_ENV === "development" ? "(개발용)" : "",
+            },
+            minify:
+                process.env.NODE_ENV === "production"
+                    ? {
+                          collapseWhitespace: true,
+                          removeComments: true,
+                      }
+                    : false,
+            hash: true,
         }),
     ],
 };
