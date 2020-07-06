@@ -2,9 +2,12 @@ const path = require("path");
 const webpack = require("webpack");
 const banner = require("./banner.js");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const devMode = process.env.NODE_ENV !== "production";
 
 module.exports = {
-    mode: "development",
+    mode: devMode ? "development" : "production",
     entry: {
         main: "./src/App.js",
     },
@@ -16,7 +19,10 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: ["style-loader", "css-loader"],
+                use: [
+                    devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+                    "css-loader",
+                ],
             },
             {
                 test: /\.(png|jpg|gif)$/i,
@@ -24,7 +30,7 @@ module.exports = {
                     {
                         loader: "url-loader",
                         options: {
-                            publicPath: "./",
+                            useRelativePath: true,
                             name: "[name].[ext]?[hash]",
                             limit: 5000, // 5kb 미만 파일만 data url로 처리
                         },
@@ -56,6 +62,11 @@ module.exports = {
                       }
                     : false,
             hash: true,
+        }),
+        new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({
+            filename: devMode ? `[name].css` : "[name].[hash].css",
+            chunkFilename: devMode ? `[id].css` : "[id].[hash].css",
         }),
     ],
 };

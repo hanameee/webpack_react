@@ -624,7 +624,75 @@ new HtmlWebpackPlugin({
 })
 ```
 
+**(4) CleanWebpackPlugin**
 
+빌드 이전 결과물을 제거하는 플러그인. 이전 빌드 내용이 덮어씌워지면 상관없지만, 그렇지 않을 경우 아웃풋 폴더에 남아 있을 수 있다.
+
+이를 방지하기 위해 CleanWebpackPlugin 을 사용할 수 있다.
+
+```shell
+$ npm i -D clean-webpack-plugin
+```
+
+> webpack.config.js
+
+```js
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+...
+module.exports = {
+  plugins: [
+    new CleanWebpackPlugin(),
+  ]
+}
+```
+
+config 이후 빌드 폴더에 임의의 파일을 만든 뒤 다시 빌드해보면 해당 파일이 삭제된 것을 알 수 있다. CleanWebpackPlugin으로 인해 아웃풋 폴더가 모두 삭제된 후 결과물이 생성되었기 때문이다.
+
+**(5) MiniCssExtractPlugin**
+
+CSS가 커지면 이를 하나의 JS 파일로 만드는 것이 부담스러울 수 있다. 브라우저에서는 큰 파일 하나를 내려받는 것 보다, 여러 개의 작은 파일을 동시에 다운로드하는 것이 빠르기 때문이다.
+
+따라서 개발 환경에서는 크게 상관 없지만, 프로덕션 환경에서는 CSS 코드를 별도의 CSS 파일로 분리하는 것이 좋다. 이 역할을 해주는 플러그인이 [MiniCssExtractPlugin](https://github.com/webpack-contrib/mini-css-extract-plugin)이다.
+
+```shell
+$ npm i -D mini-css-extract-plugin
+```
+
+> webpack.config.js
+
+```js
+new MiniCssExtractPlugin({
+  filename: devMode ? `[name].css` : "[name].[hash].css",
+  chunkFilename: devMode ? `[id].css` : "[id].[hash].css",
+}),
+```
+
+위처럼 플러그인을 추가해주고, 개발환경에서는 css-loader에 의해 변경된 스타일시트를 적용하기 위해 style-loader을 사용했지만 프로덕션환경에서는 별도의 css 파일로 추출할 것이므로 다른 로더를 사용해야 한다.
+
+> webpack.config.js
+
+```js
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+                    devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+                    "css-loader",
+                ],
+            },
+          ...
+        ],
+    },
+```
+
+플러그인에서 제공하는 MiniCssExtractPlugin.loader 를 사용해 위와 같이 설정해줬다.
+
+이렇게 설정한 뒤 빌드해보면 css 파일이 별도로 생성되었고 index.html에 해당 css를 로딩하는 코드가 추가되었음을 볼 수 있다.
+
+### 3. 정리
+
+웹팩은 ES6 모듈시스템을 쉽게 사용하도록 돕는 역할을 한다. Entry point를 시작으로, 연결되어 있는 모든 모듈을 하나로 합쳐서 결과물을 만드는 것이 웹팩의 역할이다. JS 모듈 뿐만 아니라 CSS, 이미지 파일 등 모든 파일을 모듈로 제공해주므로 일관성 있는 개발을 할 수 있다.
 
 ---
 
