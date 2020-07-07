@@ -4,6 +4,7 @@
     "description": "Create React App from scratch",
     "main": "index.js",
     "scripts": {
+        "start": "webpack-dev-server",
         "build": "NODE_ENV=production webpack",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -26,7 +27,8 @@
         "style-loader": "^1.2.1",
         "url-loader": "^4.1.0",
         "webpack": "^4.43.0",
-        "webpack-cli": "^3.3.11"
+        "webpack-cli": "^3.3.11",
+        "webpack-dev-server": "^3.11.0"
     },
     "dependencies": {
         "react": "^16.13.1",

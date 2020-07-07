@@ -69,4 +69,12 @@ module.exports = {
             chunkFilename: devMode ? `[id].css` : "[id].[hash].css",
         }),
     ],
+    devServer: {
+        contentBase: path.join(__dirname, "dist"),
+        publicPath: "/",
+        overlay: true,
+        port: 8080,
+        stats: "errors-only",
+        historyApiFallback: true,
+    },
 };
