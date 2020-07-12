@@ -1,10 +1,7 @@
 import * as math from "./math.js";
 import "./styles/index.css";
-console.log(math.sum(1, 2));
-console.log(VERSION);
-console.log(PRODUCTION);
-console.log(MAX_COUNT);
-console.log(api.domain);
-console.log(TWO);
-console.log(NAME);
-console.log(process.env.NODE_ENV);
+import MainController from "./controllers/MainController.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+    new MainController();
+});

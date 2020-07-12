@@ -798,11 +798,32 @@ app.get('/api/keywords', (req,res) => {
 
 컨트롤러는 요청과 응답을 받아, res.json으로 리턴한다.
 
+서버를 구동하고 curl로 위에서 정의한 endpoint에 http 요청을 보내면, json을 리턴한다.
 
+<img src="README.assets/image-20200707162134263.png" alt="image-20200707162134263" style="zoom:50%;" />
 
+이러한 기능은, 개발 초기 서버 API가 만들어지기 전, 서버 API 응답을 프론트엔드에서 구현할 때 사용할 수 있다.
 
+기존의 구조를 리팩토링해보자.
 
+<img src="file:///Users/hanameee/Desktop/PROGRAMMING/webpack_react/README.assets/image-20200712105711514.png?lastModify=1594519038" alt="image-20200712105711514" style="zoom:50%;" />
 
+**models** 에서는 axios로 요청을 보내 데이터를 받아온다. 앞서 devServer.before에서 추가한 라우트로 get요청을 보내 data를 받아온다.
+
+````js
+import request from "./request";
+
+export default {
+    async list() {
+        const data = await request("get", "/api/keywords");
+        return data;
+    },
+};
+````
+
+**controller** 에서는 model과 view를 import해 model로부터 data를 비동기적으로 받아온 뒤  view 해당 data를 주입해 view를 생성한다.
+
+**view** 에서는 data를 받아 html을 동적으로 생성한다.
 
 
 

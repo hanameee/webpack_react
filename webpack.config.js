@@ -70,6 +70,15 @@ module.exports = {
         }),
     ],
     devServer: {
+        before: (app, server, compiler) => {
+            app.get("/api/keywords", (req, res) => {
+                res.json([
+                    { keyword: "샤브샤브" },
+                    { keyword: "칼국수" },
+                    { keyword: "만두" },
+                ]);
+            });
+        },
         contentBase: path.join(__dirname, "dist"),
         publicPath: "/",
         overlay: true,
