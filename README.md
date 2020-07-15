@@ -758,7 +758,7 @@ host 의 경우 개발환경에서 도메인을 맞춰야 하는 경우 사용�
 
 프론트엔드는 서버와 데이터를 주고받기 위해 ajax를 사용한다. 보통은 api 서버를 어딘가 (혹은 localhost) 띄우고 프론트 서버와 함께 개발하게 되는데, 이러한 API 서버 구성을 어떻게 하는지 알아보자.
 
-#### 목업 API - devServer.before
+#### 목업 API 1 - devServer.before
 
 웹팩 개발 서버 중 before 속성을 통해 웹팩 서버에 기능을 추가할 수 있다. Node.js의 미들웨어 형태로 서버 기능을 확장할 수 있는 웹 프레임워크인 Express처럼, devServer.before에도 미들웨어를 추가할 수 있다.
 
@@ -825,7 +825,49 @@ export default {
 
 **view** 에서는 data를 받아 html을 동적으로 생성한다.
 
+#### 목업 API 2 - connect-api-mocker
 
+목업 API 갯수가 많을때는 직접 컨트롤러를 작서앟는 것 보단 connect-api-mocker을 사용해 목업 파일로 관리하면 좋다. 특정 목업 폴더를 만들어 api 응답을 담은 파일을 저장한 뒤, 이 폴더를 api로 제공해주는 기능을 한다.
+
+```shell
+npm i -D connect-api-mocker
+```
+
+>  root 경로 기준) mocks/api/keywords/GET.json
+
+```json
+[
+  { "keyword": "이탈리아" }, 
+  { "keyword": "세프의요리" }, 
+  { "keyword": "제철" }, 
+  { "keyword": "홈파티 " }
+]
+```
+기존에 추가했던 목업 응답 컨트롤러를 제거하고, connect-api-mocker로 미들웨어를 대신한다.
+
+> webpack.config.js
+
+```js
+const apiMocker = require('connect-api-mocker')
+
+module.exports = {
+  devServer: {
+    before: (app, server, compiler) => {
+      app.use(apiMocker('/api', 'mocks/api'))
+    },
+  }
+}
+```
+
+express 객체인 app은 미들웨어 추가를 위한 범용 메소드 `use()` 를 제공한다.
+
+`apiMocker("설정할 라우팅 경로", "응답으로 제공할 목업 파일 경로")` 이다.
+
+#### 실제 API 연동 - devServer.proxy
+
+목업 API 갯수가 많을때는 직접 컨트롤러를 
+
+s
 
 ---
 

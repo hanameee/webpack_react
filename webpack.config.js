@@ -1,10 +1,11 @@
+const devMode = process.env.NODE_ENV !== "production";
 const path = require("path");
 const webpack = require("webpack");
 const banner = require("./banner.js");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const devMode = process.env.NODE_ENV !== "production";
+const apiMocker = require("connect-api-mocker");
 
 module.exports = {
     mode: devMode ? "development" : "production",
@@ -71,13 +72,7 @@ module.exports = {
     ],
     devServer: {
         before: (app, server, compiler) => {
-            app.get("/api/keywords", (req, res) => {
-                res.json([
-                    { keyword: "샤브샤브" },
-                    { keyword: "칼국수" },
-                    { keyword: "만두" },
-                ]);
-            });
+            app.use(apiMocker("/api", "mocks/api"));
         },
         contentBase: path.join(__dirname, "dist"),
         publicPath: "/",
