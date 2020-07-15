@@ -5,7 +5,6 @@ const banner = require("./banner.js");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const apiMocker = require("connect-api-mocker");
 
 module.exports = {
     mode: devMode ? "development" : "production",
@@ -71,8 +70,8 @@ module.exports = {
         }),
     ],
     devServer: {
-        before: (app, server, compiler) => {
-            app.use(apiMocker("/api", "mocks/api"));
+        proxy: {
+            "/api": "http://localhost:3001",
         },
         contentBase: path.join(__dirname, "dist"),
         publicPath: "/",

@@ -176,3 +176,67 @@ express 객체인 app은 미들웨어 추가를 위한 범용 메소드 `use()` 
 
 `apiMocker("설정할 라우팅 경로", "응답으로 제공할 목업 파일 경로")` 이다.
 
+#### 실제 API 연동 - devServer.proxy
+
+목업이 아닌 실제 API 서버에 요청을 한다고 가정해보자. 아래처럼 서버 세팅을 해두고,
+
+```bash
+curl localhost:3001/api/test
+[{ "keyword": "샤브샤브" }, { "keyword": "칼국수" }, { "keyword": "만두" }]
+```
+> src/models/KeywordModel.js
+
+```js
+import request from "./request";
+
+export default {
+    async list() {
+        const data = await request("get", "http://localhost:3001/api/test");
+        return data;
+    },
+};
+```
+
+직접 서버에 API 요청을 해보면, CORS 오류를 만날 수 있다. 같은 도메인 (localhost) 이지만, 포트번호가 다르기에 다른 Origin으로 인식되기 때문이다.
+
+CORS 이슈 해결책은 아래 2가지가 있다. (둘 중 한가지만 해도 OK)
+
+1) 서버 측 해결방법: 해당 API 응답 헤더에 `Access-Control-Allow-Origin: *` 헤더를 추가해준다.
+
+> server의 API 컨트롤러
+
+```js
+app.get('/api/keywords', (req,res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.json(keywords)
+})
+```
+
+2) 클라이언트 측 해결방법: webpack-dev-server에서 API 서버로 프록싱한다.
+
+> webpack.config.js
+
+```js
+// webpack.config.js
+module.exports = {
+  devServer: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+    }
+  }
+}
+```
+개발서버로 들어온 모든 http 요청 중, /api 로 시작하는 것은 http://localhost:3001  로 요청하도록 프록싱 하는 것이다.
+> src/models/KeywordModel.js
+
+```js
+import request from "./request";
+
+export default {
+    async list() {
+      	// api endpoint를 변경해준다
+        const data = await request("get", "/api/test");
+        return data;
+    
+};
+```
