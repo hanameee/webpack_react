@@ -8,6 +8,11 @@ export default class MainController {
         this.renderView();
     }
     async renderView() {
+        if (module.hot) {
+            console.log("핫모듈 켜짐");
+            module.hot.accept("../views/KeywordView.js", () => {});
+            console.log("view 모듈 변경됨");
+        }
         const data = await KeywordModel.list();
         this.keywordView.mount(data);
     }

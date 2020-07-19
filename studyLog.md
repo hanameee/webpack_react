@@ -240,3 +240,49 @@ export default {
     
 };
 ```
+
+
+
+### 3-3. 핫 모듈 리플레이스먼트 (HMR)
+
+[공식 문서](https://webpack.js.org/guides/hot-module-replacement/#other-code-and-frameworks)
+
+Webpack dev server은 코드의 변화를 감지해서 전체 화면을 갱신(새로고침)한다. 그런데 SPA는 브라우저에서 state로 데이터를 관리하기 때문에 새로고침이 되면 모든 데이터가 초기화되어버리는 불편함이 있다.
+
+HMR은 전체 화면 갱신 없이, 변경한 모듈만 변경하는 기능으로 Webpack dev server 이 제공하는 기능이다.
+
+> webpack.config.js
+
+```js
+// webpack.config.js:
+module.exports = {
+  devServer = {
+    hot: true,
+  },
+}
+```
+
+위처럼 devServer.hot 옵션을 켜면, Webpack dev server 에서Webpack dev server 객체가 생성된다. Module.hot 객체의 `accept()` 메소드는 감시할 모듈과 콜백 함수를 인자로 받는다.
+
+```js
+if (module.hot) {
+  console.log('핫모듈 켜짐')
+	// view 모듈을 감시하고, 해당 모듈에 변경사항이 있으면 전달한 콜백 함수가 동작한다.
+  module.hot.accept('./view', () => {
+    console.log('view 모듈 변경됨')
+  }) 
+}
+```
+
+이 콜백함수를 이용하면 화면 새로고침 없이 변경된 모듈만 아래처럼 교체할 수 있다.
+
+```js
+if (module.hot) {
+  module.hot.accept('./view', async () => {
+    view.render(await model.get(), controller.el); // 변경된 모듈로 교체 
+  }) 
+}
+```
+
+위와 같이 HMR 인터페이스를 구현한 로더만이 핫 로딩을 지원한다. 예를 들어 `style-loader` 같은 경우 내부 코드를 보면 hot.accept()  함수를 사용한 것을 알 수 있다.
+
