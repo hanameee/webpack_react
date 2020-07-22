@@ -4,8 +4,8 @@
     "description": "Create React App from scratch",
     "main": "index.js",
     "scripts": {
-        "start": "webpack-dev-server",
-        "build": "NODE_ENV=production webpack",
+        "start": "webpack-dev-server --progress",
+        "build": "NODE_ENV=development webpack --progress",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

@@ -6,8 +6,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+const mode = process.env.NODE_ENV || "development";
+
 module.exports = {
-    mode: devMode ? "development" : "production",
+    mode,
     entry: {
         main: "./src/App.js",
     },

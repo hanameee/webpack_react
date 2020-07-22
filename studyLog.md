@@ -286,3 +286,58 @@ if (module.hot) {
 
 위와 같이 HMR 인터페이스를 구현한 로더만이 핫 로딩을 지원한다. 예를 들어 `style-loader` 같은 경우 내부 코드를 보면 hot.accept()  함수를 사용한 것을 알 수 있다.
 
+
+
+### 3-4. 최적화
+
+#### 1. production 모드
+
+가장 기본적인 방법은 **mode 값을 설정**하는 것이다.
+
+[development]
+
+DefinePlugin 을 사용하면 `process.env.NODE_ENV ` 값이 "development" 으로 설정되어 어플리케이션에 전역변수로 주입된다. 
+
+development 는 디버깅 편의를 위해 아래 두 플러그인을 사용한다.
+
+- NamedChunksPlugin
+- NamedModulesPlugin
+
+반면, mode를 product로 설정하면 JS결과물을 최소화하기 위해 아래 7개 플러그인을 사용한다. DefinePlugin 을 사용하면 `process.env.NODE_ENV ` 값이 "production" 으로 설정되어 어플리케이션에 전역변수로 주입된다. 
+
+- FlagDependencyUsagePlugin
+- FlagIncludedChunksPlugin
+- ModuleConcatenationPlugin
+- NoEmitOnErrorsPlugin
+- OccurrenceOrderPlugin
+- SideEffectsFlagPlugin
+- TerserPlugin
+
+> webpack.config.js
+
+```js
+const mode = process.env.NODE_ENV || 'development'; // 기본값은 development
+
+module.exports = {
+  mode,
+}
+```
+
+> package.json
+
+```js
+{
+  "scripts": {
+    "start": "webpack-dev-server --progress", // start는 개발 서버를 구동하므로 환경변수를 사용하지 않고 기본값 development를 사용하게 된다
+    "build": "NODE_ENV=production webpack --progress" // 배포용 build는 환경변수를 production으로 설정했으므로 config 파일의 mode에 production이 설정된다
+  }
+}
+```
+
+- development mode로 빌드한 결과물
+
+<img src="studyLog.assets/image-20200722235626970.png" alt="image-20200722235626970" style="zoom: 33%;" />
+
+- Production mode로 빌드한 결과물
+
+<img src="studyLog.assets/image-20200722235711487.png" alt="image-20200722235711487" style="zoom: 33%;" />
