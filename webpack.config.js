@@ -5,6 +5,8 @@ const banner = require("./banner.js");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const mode = process.env.NODE_ENV || "development";
 
@@ -16,6 +18,21 @@ module.exports = {
     output: {
         filename: "[name].js",
         path: path.resolve("./dist"),
+    },
+    optimization: {
+        minimizer:
+            mode === "production"
+                ? [
+                      new OptimizeCssAssetsPlugin(),
+                      new TerserPlugin({
+                          terserOptions: {
+                              compress: {
+                                  drop_console: true,
+                              },
+                          },
+                      }),
+                  ]
+                : [],
     },
     module: {
         rules: [

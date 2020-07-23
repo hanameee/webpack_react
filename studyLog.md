@@ -341,3 +341,56 @@ module.exports = {
 - Production mode로 빌드한 결과물
 
 <img src="studyLog.assets/image-20200722235711487.png" alt="image-20200722235711487" style="zoom: 33%;" />
+
+#### 2. optimization 속성
+
+웹팩은 [optimazation](https://webpack.js.org/configuration/optimization/) 속성을 통해 빌드 과정에서 최적화를 커스터마이징 할 수 있다.
+
+```bash
+npm i -D optimize-css-assets-webpack-plugin
+```
+
+> Webpack.config.js
+
+```js
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+
+module.exports = {
+  optimization: {
+    minimizer: mode === 'production' ? [
+      new OptimizeCSSAssetsPlugin(),
+    ] : [],
+  },
+}
+```
+
+webpack의 `optimization.minimizer` 속성에는 빌드하는 과정에서 **결과물을 압축할 때 사용할 플러그인**을 배열로 넣을 수 있다.
+
+[optimize-css-assets-webpack-plugin](https://webpack.js.org/plugins/mini-css-extract-plugin/#minimizing-for-production) 는 css를 압축하는데, 이 플러그인을 설치 후 위처럼 config에 설정해주면 production 모드에서 빌드 시 css 파일이 압축된다. (빈칸 없어짐)
+
+그 외에도 자바스크립트 코드를 난독화하고 debugger 구문을 제거하는 [TerserWebpackPlugin](https://webpack.js.org/plugins/terser-webpack-plugin/) 등의 minimizer 또한 존재한다. 기본 설정 외에도 콘솔 로그를 제거하는 등의 옵션도 있다.
+
+```bash
+npm i -D terser-webpack-plugin
+```
+
+> webpack.config.js
+
+```js
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+  optimization: {
+    minimizer: mode === 'production' ? [
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            drop_console: true, // 콘솔 로그 제거
+          }
+        }
+      }),
+    ] : [],
+  },
+}
+```
+
