@@ -394,3 +394,102 @@ module.exports = {
 }
 ```
 
+#### 3. 코드 스플리팅
+
+##### 수동으로 entry 분리하기
+
+큰 파일 하나를 다운로드 하는 것 보다, 작은 파일 여러개를 동시에 다운로드 하는 것이 더 빠르다. 따라서 코드를 압축한 결과물을 여러개로 쪼개면 브라우저 다운로드 속도를 높일 수 있다.
+
+가장 간단한 형태는 빌드 entry를 여러개로 분리하는 것이다.
+
+> webpack.config.js
+
+```js
+module.exports = {
+  entry: {
+    main: "./src/app.js",
+    controller: "./src/controller.js",
+  }
+}
+```
+
+위 처럼 entry를 2개로 쪼개면 entry가 2개 생성된다.
+
+그런데, 단순히 entry를 쪼개는 것만으로는 큰 용량의 감소를 기대할 수 없다. 왜냐하면 두 entry 간의 **중복 코드**가 존재하기 때문이다.
+
+예를 들어, main과 controller이 둘다 axios 라이브러리를 사용한다면 각각의 빌드 결과에도 중복된 axios 모듈이 포함되어 빌드되게 된다.
+
+이 때 사용할 수 있는 플러그인이 [SplitChunksPlugin](https://webpack.js.org/guides/code-splitting/#prevent-duplication)으로, 코드를 분리 시 중복을 예방하는 플러그인이다.
+
+> webpack.config.js
+
+```js
+module.exports = {
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
+}
+```
+
+`optimization.splitChunks` 속성을 설정하면 엔트리 간의 중복된 코드를 모아 별도의 파일로 만들어준다.
+
+예를 들어 위 예제의 경우, main과 controller에서 중복으로 사용된 코드는 빌두 결과 후 별도의 파일에만 존재하게 된다.
+
+그런데 이러한 방식은 entry point를 직접 적절히 분리해야 하기에 손이 많이 간다는 단점이 있다. 이를 자동으로 해주는 것이 다이나믹 임포트!
+
+##### Dynamic import
+
+기존 컨트롤러를 불러오는 코드가 아래와 같다고 가정해보자.
+
+> App.js
+
+```js
+import controller from './controller';
+
+document.addEventListener('DOMContentLoaded', () => {
+  controller.init(document.querySelector('#app'))
+})
+```
+
+기존의 `import/from` 대신, 아래처럼 동적 임포트를 사용할 수 있다.
+
+```js
+import "./styles/index.css";
+
+function getController() {
+    return import(
+        /* webpackChunkName: "controller" */ "./controllers/MainController.js"
+    ).then((m) => {
+        return m.default;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    getController().then((controller) => {
+        controller.init(document.querySelector("#app"));
+    });
+});
+```
+
+이렇게 동적 import를 사용하면, DOMContentLoaded 이벤트가 발생한 후에 비동기적으로 controller 모듈을 가져올 수 있다.
+
+import 함수 내부에 주석으로 `webpackChunkName: “controller”` 을 전달해, 웹팩이 파일을 청크로 분리할 때 사용할 청크 이름을 설정할 수 있다.
+
+이렇게 Dynamic import를 사용하면 위에서 config에 설정한 entry point나 optimization 설정 없이도, 자동으로 단일 엔트리(예제에서는 main)를 유지하며 코드를 분리할 수 있다.
+
+> webpack.config.js
+
+```js
+module.exports = {
+    mode,
+    entry: {
+        main: "./src/App.js",
+    },
+```
+
+config에 단일 entry만 설정해도, 아래와 같이 자동으로 코드가 분리된 것을 볼 수 있다.
+
+<img src="studyLog.assets/image-20200725001922225.png" alt="image-20200725001922225" style="zoom:67%;" />
+

@@ -1,7 +1,15 @@
-import * as math from "./math.js";
 import "./styles/index.css";
-import MainController from "./controllers/MainController.js";
+
+function getController() {
+    return import(
+        /* webpackChunkName: "controller" */ "./controllers/MainController.js"
+    ).then((m) => {
+        return m.default;
+    });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    new MainController();
+    getController().then((controller) => {
+        controller.init(document.querySelector("#app"));
+    });
 });
